@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col gap-4 py-4">
+  <div class="flex flex-col gap-4 p-4">
     <p class="text-xl font-bold text-center">Dynamic Virtual List Table</p>
 
     <div ref="parentRef" class="h-[600px] overflow-auto">
@@ -44,7 +44,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup lang="ts" generic="T extends Record<string, any>">
   import { ref, computed } from 'vue';
   import { useVirtualizer } from '@tanstack/vue-virtual';
   import {
@@ -56,12 +56,12 @@
   } from '@tanstack/vue-table';
 
   type Props = {
-    data: Record<string, any>[];
+    data: T[];
+    columns: ColumnDef<T>[];
   };
 
   const props = defineProps<Props>();
 
-  type RowType = (typeof props.data)[number];
   const sorting = ref<SortingState>([]);
 
   const setSorting = (sortingUpdater: any) => {
@@ -70,20 +70,9 @@
     sorting.value = newSortVal;
   };
 
-  const columns = computed<ColumnDef<RowType>[]>(() => {
-    const col = Object.keys(props.data[0]).map<ColumnDef<RowType>>((val) => ({
-      header: val,
-      id: val,
-      accessorKey: val,
-      minSize: 600,
-    }));
-
-    return col;
-  });
-
   const table = useVueTable({
     data: props.data,
-    columns: columns.value,
+    columns: props.columns,
     state: {
       get sorting() {
         return sorting.value;

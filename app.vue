@@ -1,6 +1,6 @@
 <template>
   <div>
-    <DynamicVirtualTable :data>
+    <DynamicVirtualTable :data :columns>
       <template #header="{ header }">
         <div
           v-if="!header.isPlaceholder"
@@ -33,9 +33,21 @@
 
 <script setup lang="ts">
   import datas from '@/data/table_data.json';
-  import { FlexRender } from '@tanstack/vue-table';
+  import { FlexRender, type ColumnDef } from '@tanstack/vue-table';
 
   const data = ref(datas);
+  type RowType = (typeof data.value)[number];
+
+  const columns = computed<ColumnDef<RowType>[]>(() => {
+    const col = Object.keys(data.value[0]).map<ColumnDef<RowType>>((val) => ({
+      header: val,
+      id: val,
+      accessorKey: val,
+      minSize: 600,
+    }));
+
+    return col;
+  });
 
   const getSortingHandler = (e: Event, fn: any) => {
     return fn(e);
